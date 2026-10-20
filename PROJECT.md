@@ -1,6 +1,6 @@
 # Spese Semplici
 
-Versione progetto: **1.3.0**  
+Versione progetto: **1.3.1**  
 Stato: **in produzione**
 
 Spese Semplici è una PWA personale per iPhone, utilizzabile offline e senza database esterno. Il codice è pubblicato tramite GitHub Pages; movimenti, conti e budget rimangono nel browser del dispositivo.

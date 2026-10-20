@@ -174,9 +174,12 @@
 
   function updateTypeButtons(){
     document.querySelectorAll('[data-transaction-type]').forEach(button=>{
-      const locked=Boolean(lockedSpecialType);
-      button.disabled=locked&&button.dataset.transactionType!==lockedSpecialType;
-      button.classList.toggle('locked',locked);
+      const editingId=$('expenseId').value;
+      const editingOrdinary=Boolean(editingId&&!editingId.includes(':'));
+      const blockedBySpecial=Boolean(lockedSpecialType&&button.dataset.transactionType!==lockedSpecialType);
+      const blockedByOrdinary=editingOrdinary&&(button.dataset.transactionType==='balance'||button.dataset.transactionType==='transfer');
+      button.disabled=blockedBySpecial||blockedByOrdinary;
+      button.classList.toggle('locked',button.disabled);
     });
   }
 
