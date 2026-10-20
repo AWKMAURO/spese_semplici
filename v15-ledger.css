@@ -1,0 +1,42 @@
+/* Movimenti v15: Saldo e Giroconto */
+#liveBalanceSummary{display:none!important}
+.state-accounts .balance-inline-button{display:none!important}
+
+.transaction-type{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.transaction-type button{min-height:44px;padding:10px 6px;line-height:1.15;touch-action:manipulation}
+.transaction-type button.active[data-transaction-type="balance"]{background:#e9eef5;color:#31546f;box-shadow:0 3px 10px rgba(42,55,49,.1)}
+.transaction-type button.active[data-transaction-type="transfer"]{background:#e9f0ec;color:var(--green);box-shadow:0 3px 10px rgba(42,55,49,.1)}
+.transaction-type button.locked:not(.active),.transaction-type button:disabled:not(.active){opacity:.42}
+.transaction-type button:disabled{cursor:default}
+
+.v15-movement-hint{margin:10px 2px 2px;padding:12px 13px;border-radius:14px;background:#f0ede5;color:var(--muted);font-size:.75rem;line-height:1.45}
+.v15-movement-hint strong{color:var(--ink)}
+.v15-form-hidden{display:none!important}
+.v15-only.hidden,.v15-balance-fields.hidden,.v15-transfer-fields.hidden{display:none!important}
+.v15-transfer-fields .inline-fields{grid-template-columns:1fr}
+#v15TransferDestinationField{margin-top:12px}
+#saveButton:disabled{opacity:.5;cursor:not-allowed}
+
+.v15-sign-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.v15-sign-choice button{min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);font-size:.75rem;font-weight:850;cursor:pointer;touch-action:manipulation}
+.v15-sign-choice button.active{border-color:var(--green);background:#e8f0ec;color:var(--green)}
+.v15-sign-choice button[data-v15-sign="negative"].active{border-color:var(--accent);background:#fff0ea;color:var(--accent-dark)}
+
+.balance-adjustment-item .expense-icon{background:#e9eef5;color:#31546f}
+.transfer-item .expense-icon{background:#e9f0ec;color:var(--green)}
+.balance-adjustment-badge,.transfer-badge{display:inline-block!important;margin-left:4px;padding:2px 6px;border-radius:99px;font-size:.62rem!important;font-weight:850}
+.balance-adjustment-badge{background:#e9eef5;color:#31546f!important}
+.transfer-badge{background:#e9f0ec;color:var(--green)!important}
+.neutral-amount{color:var(--ink)!important}
+.balance-adjustment-item .expense-copy,.transfer-item .expense-copy{min-width:0}
+.balance-adjustment-item .expense-copy strong,.transfer-item .expense-copy strong{overflow-wrap:anywhere}
+.balance-adjustment-item .expense-copy span,.transfer-item .expense-copy span{line-height:1.35;white-space:normal}
+.balance-adjustment-item .expense-menu button,.transfer-item .expense-menu button{min-height:32px}
+
+@media(max-width:380px){
+  .transaction-type{gap:6px}
+  .transaction-type button{padding:9px 4px;font-size:.72rem}
+  .balance-adjustment-item,.transfer-item{grid-template-columns:42px minmax(0,1fr) auto;gap:9px}
+  .balance-adjustment-item .expense-icon,.transfer-item .expense-icon{width:42px;height:42px}
+}
+

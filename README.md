@@ -8,6 +8,8 @@ Per i conti e i contanti il saldo di partenza può essere positivo o negativo; i
 
 Per le carte di credito si inserisce invece il totale già speso nel ciclo corrente. Questo valore consuma il plafond e confluisce nell'addebito cumulativo del mese successivo, senza entrare nei budget delle categorie e senza ridurre subito il saldo del conto.
 
+Dal pulsante **+** sono disponibili quattro movimenti: **Uscita**, **Entrata**, **Saldo** e **Giroconto**. Saldo riconcilia un conto con il valore reale alla data scelta. Giroconto registra un prelievo da carta di credito verso conto/contanti: aumenta la liquidità, usa il plafond e confluisce nell'addebito successivo senza alterare budget, entrate o uscite.
+
 PWA locale per gestire le spese personali. Non usa server e conserva i dati nel `localStorage` del browser.
 
 ## Avvio locale
@@ -29,3 +31,4 @@ I dati sono locali al browser/dispositivo. Usare periodicamente **Impostazioni �
 ## Widget iPhone
 
 Da **Impostazioni → Widget iPhone → Come installarlo** è possibile copiare lo script per Scriptable e aggiungere un widget piccolo o medio alla schermata Home. Il widget mostra soltanto totali mensili aggregati e si aggiorna manualmente con **Sincronizza widget**.
+
