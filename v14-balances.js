@@ -195,7 +195,7 @@ renderCreditCards=function(){
   $('creditCardsChart').innerHTML=cards.map(card=>{
     const used=Math.max(v14CardVisibleActual(card.id,period),0),planned=v14CardPlannedForView(card.id),limit=Number(card.limit)||0,remaining=limit-used,p=limit?Math.round(used/limit*100):0,status=p>100?'over':p>=80?'warning':'',debitDate=chargeDate(period,card.debitDay),baseline=v14CardBaseline(card.id,period);
     const debitLabel=debitDate<=today()?'Addebitato':'Prossimo addebito';
-    return`<div class="card-status"><div class="card-status-head"><strong>💳 ${esc(card.name)}</strong><span>${eur.format(used)} di ${limit?eur.format(limit):'plafond non impostato'}</span></div><div class="budget-track"><div class="budget-fill ${status}" style="width:${limit?Math.min(p,100):0}%"></div></div><div class="card-balance-meta"><strong>${limit?`${eur.format(Math.max(remaining,0))} disponibili`:'Imposta il plafond'}</strong><span>${debitLabel} ${v14HumanDate(debitDate)} · ${eur.format(used)} su ${esc(account(card.linkedAccountId)?.name||'conto da configurare')}</span>${planned?`<span>${eur.format(planned)} di spese previste, non ancora conteggiate</span>`:''}${baseline?`<span>Base iniziale rilevata ${v14HumanDate(baseline.asOfDate)}</span>`:''}</div>${period===current?`<button type="button" class="balance-card-button" data-balance-account="${esc(card.id)}">Aggiorna situazione carta</button>`:''}</div>`;
+    return`<div class="card-status"><div class="card-status-head"><strong>💳 ${esc(card.name)}</strong><span>${eur.format(used)} di ${limit?eur.format(limit):'plafond non impostato'}</span></div><div class="budget-track"><div class="budget-fill ${status}" style="width:${limit?Math.min(p,100):0}%"></div></div><div class="card-balance-meta"><strong>${limit?`${eur.format(Math.max(remaining,0))} disponibili`:'Imposta il plafond'}</strong><span>${debitLabel} ${v14HumanDate(debitDate)} · ${eur.format(used)} su ${esc(account(card.linkedAccountId)?.name||'conto da configurare')}</span>${planned?`<span>Movimenti previsti ${planned>0?'+ ':'− '}${eur.format(Math.abs(planned))}, non ancora conteggiati</span>`:''}${baseline?`<span>Base iniziale rilevata ${v14HumanDate(baseline.asOfDate)}</span>`:''}</div>${period===current?`<button type="button" class="balance-card-button" data-balance-account="${esc(card.id)}">Aggiorna situazione carta</button>`:''}</div>`;
   }).join('');
   v14BindBalanceButtons();
 };
@@ -249,13 +249,14 @@ render=function(){
   v14RenderBalanceHero();
   const selected=account(accountFilter),period=v14ViewPeriod();
   if(selected?.type==='credit'){
-    const actual=v14CardVisibleActual(selected.id,period),planned=v14CardPlannedForView(selected.id);
+    const actual=Math.max(v14CardVisibleActual(selected.id,period),0),planned=v14CardPlannedForView(selected.id);
     $('totalLabel').textContent=`Speso con ${selected.name}`;
     $('monthlyTotal').textContent=eur.format(actual);
-    $('cashflowNote').textContent=planned?`${eur.format(planned)} previsti nel resto del ciclo. Sarà addebitato il totale il mese successivo.`:'Sarà addebitato in un’unica soluzione il mese successivo.';
+    $('cashflowNote').textContent=planned?`Movimenti previsti ${planned>0?'+ ':'− '}${eur.format(Math.abs(planned))} nel resto del ciclo. Sarà addebitato il totale il mese successivo.`:'Sarà addebitato in un’unica soluzione il mese successivo.';
   }else $('totalLabel').textContent='Bilancio del mese';
 };
 
 syncStatements();
 persistOnly();
 render();
+

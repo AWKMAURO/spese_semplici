@@ -8,7 +8,7 @@ Per i conti e i contanti il saldo di partenza può essere positivo o negativo; i
 
 Per le carte di credito si inserisce invece il totale già speso nel ciclo corrente. Questo valore consuma il plafond e confluisce nell'addebito cumulativo del mese successivo, senza entrare nei budget delle categorie e senza ridurre subito il saldo del conto.
 
-Dal pulsante **+** sono disponibili quattro movimenti: **Uscita**, **Entrata**, **Saldo** e **Giroconto**. Saldo riconcilia un conto con il valore reale alla data scelta. Giroconto registra un prelievo da carta di credito verso conto/contanti: aumenta la liquidità, usa il plafond e confluisce nell'addebito successivo senza alterare budget, entrate o uscite.
+Dal pulsante **+** sono disponibili quattro movimenti: **Uscita**, **Entrata**, **Saldo** e **Giroconto**. Saldo riconcilia un conto con il valore reale alla data scelta. Giroconto trasferisce denaro tra due conti qualsiasi senza alterare budget, entrate o uscite. Se è coinvolta una carta di credito, vengono aggiornati anche il plafond e il successivo addebito.
 
 PWA locale per gestire le spese personali. Non usa server e conserva i dati nel `localStorage` del browser.
 

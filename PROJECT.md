@@ -1,6 +1,6 @@
 # Spese Semplici
 
-Versione progetto: **1.4.0**  
+Versione progetto: **1.4.1**  
 Stato: **in produzione**
 
 Spese Semplici è una PWA personale per iPhone, utilizzabile offline e senza database esterno. Il codice è pubblicato tramite GitHub Pages; movimenti, conti e budget rimangono nel browser del dispositivo.
@@ -22,7 +22,7 @@ Spese Semplici è una PWA personale per iPhone, utilizzabile offline e senza dat
 - Saldo di partenza positivo o negativo tramite selettore ottimizzato per iPhone
 - Situazione iniziale delle carte di credito inclusa nel plafond e nel successivo addebito cumulativo
 - Rettifica **Saldo** datata, positiva, negativa o pari a zero, separata da entrate e uscite
-- **Giroconto Carta → Contanti**, incluso nel plafond e nell’addebito della carta ma escluso dai budget
+- **Giroconto tra qualsiasi coppia di conti**, escluso dai budget; le carte aggiornano plafond e addebito
 - Interfaccia minimale monocromatica, ottimizzata per iPhone e leggibile senza affidarsi ai colori
 
 ## Produzione
@@ -59,7 +59,7 @@ Non è necessario reinstallare l'app.
 - `v3.js` … `v10-category-budget-total.js`: logica applicativa e migrazioni progressive
 - `v13-widget.js`, `v13-widget.css`: collegamento e guida del widget iPhone
 - `v14-balances.js`, `v14-balances.css`: saldi di partenza per conti e carte
-- `v15-ledger.js`, `v15-ledger.css`: rettifiche saldo e giroconti dalla carta ai contanti
+- `v15-ledger.js`, `v15-ledger.css`: rettifiche saldo e giroconti tra conti, contanti e carte
 - `v16-minimal.css`: tema minimale in bianco e nero e rifiniture responsive
 - `spese-semplici-widget.js`: script da copiare nell’app Scriptable
 - `manifest.webmanifest`: configurazione PWA
@@ -78,7 +78,7 @@ Il widget riceve soltanto totali mensili aggregati tramite un collegamento local
 - Il saldo iniziale di un conto non è un movimento e non modifica entrate, uscite o budget.
 - Lo speso iniziale di una carta consuma il plafond e viene incluso nell'addebito successivo, ma non modifica i budget delle categorie.
 - Una rettifica saldo imposta il valore reale del conto a una data precisa e non è né un'entrata né un'uscita.
-- Un giroconto dalla carta ai contanti aumenta la disponibilità del conto/contanti di destinazione, consuma il plafond e confluisce nell'addebito successivo; non modifica entrate, uscite o budget.
+- Un giroconto sottrae l'importo dall'origine e lo aggiunge alla destinazione senza modificare entrate, uscite o budget. Da una carta aumenta lo speso del ciclo; verso una carta lo riduce.
 - L'estratto della carta chiude a fine mese.
 - Il mese seguente viene creato un unico addebito sul conto collegato.
 - L'addebito cumulativo non viene conteggiato nuovamente nei budget.

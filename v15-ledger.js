@@ -47,8 +47,8 @@
   v14CardCycleActual=function(cardId,period,throughDate=null){
     const baseline=v14CardBaseline(cardId,period);
     const transfers=state.transfers
-      .filter(item=>item.fromAccountId===cardId&&v14Period(item.date)===period&&(!throughDate||item.date<=throughDate)&&(!baseline||afterAnchor(item,baseline)))
-      .reduce((sum,item)=>sum+Number(item.amount),0);
+      .filter(item=>(item.fromAccountId===cardId||item.toAccountId===cardId)&&v14Period(item.date)===period&&(!throughDate||item.date<=throughDate)&&(!baseline||afterAnchor(item,baseline)))
+      .reduce((sum,item)=>sum+(item.fromAccountId===cardId?Number(item.amount):0)-(item.toAccountId===cardId?Number(item.amount):0),0);
     return cents(previousCardCycleActual(cardId,period,throughDate)+transfers);
   };
 
@@ -57,8 +57,8 @@
     const period=v14ViewPeriod(),current=v14CurrentPeriod(),baseline=v14CardBaseline(cardId,period);
     if(period<current)return 0;
     const futureTransfers=state.transfers
-      .filter(item=>item.fromAccountId===cardId&&v14Period(item.date)===period&&item.date>today()&&(!baseline||afterAnchor(item,baseline)))
-      .reduce((sum,item)=>sum+Number(item.amount),0);
+      .filter(item=>(item.fromAccountId===cardId||item.toAccountId===cardId)&&v14Period(item.date)===period&&item.date>today()&&(!baseline||afterAnchor(item,baseline)))
+      .reduce((sum,item)=>sum+(item.fromAccountId===cardId?Number(item.amount):0)-(item.toAccountId===cardId?Number(item.amount):0),0);
     return cents(previousCardPlannedForView(cardId)+futureTransfers);
   };
 
@@ -70,7 +70,7 @@
         .filter(item=>item.accountId===card.id&&item.kind!=='credit_statement')
         .forEach(item=>periods.add(v14Period(item.date)));
       state.transfers
-        .filter(item=>item.fromAccountId===card.id)
+        .filter(item=>item.fromAccountId===card.id||item.toAccountId===card.id)
         .forEach(item=>periods.add(v14Period(item.date)));
       for(const period of periods){
         if(!/^\d{4}-\d{2}$/.test(period))continue;
@@ -110,7 +110,7 @@
   const transferField=document.createElement('label');
   transferField.id='v15TransferDestinationField';
   transferField.className='text-field v15-only hidden';
-  transferField.innerHTML='<span>A conto / contanti</span><select id="v15TransferDestination"></select>';
+  transferField.innerHTML='<span>A conto o carta</span><select id="v15TransferDestination"></select>';
   document.querySelector('#expenseForm .inline-fields')?.after(transferField);
 
   let balanceSign=1;
@@ -129,17 +129,19 @@
   }
   signChoice.querySelectorAll('[data-v15-sign]').forEach(button=>button.onclick=()=>setBalanceSign(button.dataset.v15Sign==='negative'?-1:1));
 
-  function preferredCashAccount(){
-    const banks=state.accounts.filter(item=>item.type!=='credit');
-    return banks.find(item=>/contant|cash/i.test(item.name))||banks[0]||null;
+  function preferredTransferDestination(available){
+    const banks=available.filter(item=>item.type!=='credit');
+    return banks.find(item=>/contant|cash/i.test(item.name))||banks[0]||available[0]||null;
   }
 
   function renderTransferDestination(){
     const select=$('v15TransferDestination');
     if(!select)return;
-    const previous=select.value,available=state.accounts.filter(item=>item.type!=='credit');
-    select.innerHTML=available.map(item=>`<option value="${esc(item.id)}">● ${esc(item.name)}</option>`).join('');
-    const fallback=preferredCashAccount();
+    const previous=select.value,sourceId=$('account').value,available=state.accounts.filter(item=>item.id!==sourceId);
+    select.innerHTML=available.length
+      ?available.map(item=>`<option value="${esc(item.id)}">${item.type==='credit'?'💳':'●'} ${esc(item.name)}</option>`).join('')
+      :'<option value="">Aggiungi un secondo conto</option>';
+    const fallback=preferredTransferDestination(available);
     select.value=available.some(item=>item.id===previous)?previous:(fallback?.id||'');
   }
 
@@ -163,14 +165,17 @@
       return;
     }
     if(transactionType==='transfer'){
-      const old=$('account').value,available=state.accounts.filter(item=>item.type==='credit');
-      $('account').innerHTML=available.map(item=>`<option value="${esc(item.id)}">💳 ${esc(item.name)}</option>`).join('');
+      const old=$('account').value,available=state.accounts;
+      $('account').innerHTML=available.map(item=>`<option value="${esc(item.id)}">${item.type==='credit'?'💳':'●'} ${esc(item.name)}</option>`).join('');
       $('account').value=available.some(item=>item.id===old)?old:(available[0]?.id||'');
       renderTransferDestination();
       return;
     }
     previousRenderAccountsForType();
   };
+  $('account')?.addEventListener('change',()=>{
+    if(transactionType==='transfer')renderTransferDestination();
+  });
 
   function updateTypeButtons(){
     document.querySelectorAll('[data-transaction-type]').forEach(button=>{
@@ -206,11 +211,11 @@
       $('saveButton').textContent=editing?'Salva saldo':'Registra saldo';
       movementHint.innerHTML='<strong>Saldo reale</strong><br>Imposta quanto c’è davvero sul conto in questa data. Non sarà conteggiato come entrata o uscita.';
     }else if(transactionType==='transfer'){
-      if(accountLabel)accountLabel.textContent='Da carta di credito';
-      if(formTitle)formTitle.textContent=editing?'Modifica giroconto':'Giroconto carta → contanti';
+      if(accountLabel)accountLabel.textContent='Da conto o carta';
+      if(formTitle)formTitle.textContent=editing?'Modifica giroconto':'Nuovo giroconto';
       $('amount').setAttribute('aria-label','Importo del giroconto');
       $('saveButton').textContent=editing?'Salva giroconto':'Registra giroconto';
-      movementHint.innerHTML='<strong>Prelievo dalla carta</strong><br>Aumenta i contanti, usa il plafond e confluisce nell’addebito della carta. Non è una spesa né un’entrata.';
+      movementHint.innerHTML='<strong>Trasferimento tra conti</strong><br>Sposta denaro senza registrare entrate o uscite e senza incidere sui budget. Se usi una carta, aggiorna anche plafond e prossimo addebito.';
       renderTransferDestination();
     }else{
       if(accountLabel)accountLabel.textContent=transactionType==='income'?'Conto / contanti':'Conto o carta';
@@ -283,8 +288,9 @@
   function saveTransfer(){
     const amount=parseAmount($('amount').value),fromAccountId=$('account').value,toAccountId=$('v15TransferDestination').value,date=$('date').value;
     const source=account(fromAccountId),destination=account(toAccountId);
-    if(!source||source.type!=='credit')return alert('Scegli la carta di credito da cui prelevare.');
-    if(!destination||destination.type==='credit')return alert('Scegli il conto o i contanti su cui arriva il denaro.');
+    if(state.accounts.length<2)return alert('Aggiungi almeno due conti per registrare un giroconto.');
+    if(!source)return alert('Scegli il conto di origine.');
+    if(!destination)return alert('Scegli il conto di destinazione.');
     if(fromAccountId===toAccountId)return alert('Origine e destinazione devono essere diverse.');
     if(!(amount>0))return alert('Inserisci un importo maggiore di zero.');
     if(!date)return alert('Inserisci la data del giroconto.');
@@ -350,7 +356,7 @@
   function transferMarkup(item){
     const source=account(item.fromAccountId),destination=account(item.toAccountId);
     const sign=accountFilter===item.fromAccountId?'− ':accountFilter===item.toAccountId?'+ ':'';
-    return`<article class="expense-item transfer-item"><div class="expense-icon">⇢</div><div class="expense-copy"><strong>${esc(item.note||'Prelievo contanti')}<span class="transfer-badge">giroconto</span></strong><span>${esc(source?.name||'Carta')} → ${esc(destination?.name||'Contanti')} · ${dateFmt.format(new Date(`${item.date}T12:00:00`))}</span></div><div><div class="expense-amount neutral-amount">${sign}${eur.format(item.amount)}</div><div class="expense-menu"><button data-v15-edit-transfer="${esc(item.id)}">Modifica</button><button data-v15-delete-transfer="${esc(item.id)}">Elimina</button></div></div></article>`;
+    return`<article class="expense-item transfer-item"><div class="expense-icon">⇢</div><div class="expense-copy"><strong>${esc(item.note||'Giroconto')}<span class="transfer-badge">giroconto</span></strong><span>${esc(source?.name||'Origine')} → ${esc(destination?.name||'Destinazione')} · ${dateFmt.format(new Date(`${item.date}T12:00:00`))}</span></div><div><div class="expense-amount neutral-amount">${sign}${eur.format(item.amount)}</div><div class="expense-menu"><button data-v15-edit-transfer="${esc(item.id)}">Modifica</button><button data-v15-delete-transfer="${esc(item.id)}">Elimina</button></div></div></article>`;
   }
 
   renderExpenses=function(items){
@@ -370,7 +376,7 @@
       }
     });
     document.querySelectorAll('[data-v15-delete-transfer]').forEach(button=>button.onclick=()=>{
-      if(confirm('Eliminare questo giroconto? Verranno aggiornati contanti, plafond e addebito futuro della carta.')){
+      if(confirm('Eliminare questo giroconto? Verranno aggiornati i saldi collegati e, se presenti, plafond e addebiti delle carte.')){
         state.transfers=state.transfers.filter(item=>item.id!==button.dataset.v15DeleteTransfer);save();
       }
     });
@@ -391,7 +397,7 @@
     $('stateAccounts').innerHTML=state.accounts.map(item=>{
       if(item.type==='credit'){
         const used=Math.max(v14CardVisibleActual(item.id,period),0),planned=v14CardPlannedForView(item.id),limit=Number(item.limit)||0,remaining=limit-used,p=limit?Math.round(used/limit*100):0;
-        return`<article class="state-account-card live-account-card"><span>💳 ${esc(item.name)} · speso nel ciclo</span><strong>${eur.format(used)}</strong><div class="mini-progress"><i style="width:${limit?Math.min(p,100):0}%;background:${p>100?'#d95b4f':p>=80?'#e9a13b':''}"></i></div><span class="account-detail">${limit?`${eur.format(Math.max(remaining,0))} disponibili sul plafond`:'Plafond da impostare'}</span>${planned?`<span class="account-detail">${eur.format(planned)} previsti</span>`:''}</article>`;
+        return`<article class="state-account-card live-account-card"><span>💳 ${esc(item.name)} · speso nel ciclo</span><strong>${eur.format(used)}</strong><div class="mini-progress"><i style="width:${limit?Math.min(p,100):0}%;background:${p>100?'#d95b4f':p>=80?'#e9a13b':''}"></i></div><span class="account-detail">${limit?`${eur.format(Math.max(remaining,0))} disponibili sul plafond`:'Plafond da impostare'}</span>${planned?`<span class="account-detail">Movimenti previsti ${planned>0?'+ ':'− '}${eur.format(Math.abs(planned))}</span>`:''}</article>`;
       }
       if(period===current){
         const anchor=latestBalanceAnchor(item.id),balance=v14BankBalance(item.id);
