@@ -27,26 +27,26 @@
         <p class="eyebrow">IL MIO PORTAFOGLIO</p>
         <h1>Spese semplici</h1>
       </div>
-      <button class="icon-button" id="settingsButton" aria-label="Impostazioni">??</button>
+      <button class="icon-button" id="settingsButton" aria-label="Impostazioni">⚙︎</button>
     </header>
 
     <main>
       <section class="month-row" aria-label="Selezione mese">
-        <button class="chevron" id="previousMonth" aria-label="Mese precedente">?</button>
+        <button class="chevron" id="previousMonth" aria-label="Mese precedente">‹</button>
         <button class="month-label" id="monthPicker"></button>
-        <button class="chevron" id="nextMonth" aria-label="Mese successivo">?</button>
+        <button class="chevron" id="nextMonth" aria-label="Mese successivo">›</button>
       </section>
       <nav class="account-tabs" id="accountTabs"></nav>
 
       <section class="summary-card">
         <p id="totalLabel">Uscite effettive del mese</p>
-        <strong id="monthlyTotal">? 0,00</strong>
+        <strong id="monthlyTotal">€ 0,00</strong>
         <div class="budget-row">
           <span id="budgetText">Imposta un budget mensile</span>
           <span id="budgetPercent"></span>
         </div>
         <div class="progress"><span id="budgetProgress"></span></div>
-        <p class="cashflow-note" id="cashflowNote">Gli acquisti con carta entreranno nel totale solo al momento dell?addebito.</p>
+        <p class="cashflow-note" id="cashflowNote">Gli acquisti con carta entreranno nel totale solo al momento dell’addebito.</p>
       </section>
 
       <section id="creditCardsSection" class="card budget-chart hidden">
@@ -71,7 +71,7 @@
         <form id="expenseForm">
           <input type="hidden" id="expenseId">
           <label class="amount-field">
-            <span>?</span>
+            <span>€</span>
             <input id="amount" inputmode="decimal" placeholder="0,00" required aria-label="Importo">
           </label>
 
@@ -82,7 +82,7 @@
             <label class="text-field"><span>Data</span><input id="date" type="date" required></label>
           </div>
           <label class="text-field"><span>Nota</span><input id="note" maxlength="80" placeholder="Facoltativa, es. affitto"></label>
-          <label class="check-row"><input id="isRecurring" type="checkbox"><span>? una spesa ricorrente</span></label>
+          <label class="check-row"><input id="isRecurring" type="checkbox"><span>È una spesa ricorrente</span></label>
           <label class="text-field hidden" id="frequencyField"><span>Ripetizione</span><select id="frequency"><option value="weekly">Ogni settimana</option><option value="monthly" selected>Ogni mese</option><option value="yearly">Ogni anno</option></select></label>
 
           <button class="primary-button" type="submit" id="saveButton">Aggiungi spesa</button>
@@ -100,7 +100,7 @@
         </div>
         <div class="expense-list" id="expenseList"></div>
         <div class="empty-state" id="emptyState">
-          <div>?</div>
+          <div>✓</div>
           <h3>Ancora nessuna spesa</h3>
           <p>Aggiungi la prima: bastano pochi secondi.</p>
         </div>
@@ -112,15 +112,15 @@
     <form method="dialog" class="dialog-card scrollable" id="settingsForm">
       <div class="dialog-heading">
         <h2>Impostazioni</h2>
-        <button class="icon-button" value="cancel" aria-label="Chiudi">?</button>
+        <button class="icon-button" value="cancel" aria-label="Chiudi">×</button>
       </div>
       <label class="text-field">
-        <span>Budget mensile complessivo (?)</span>
+        <span>Budget mensile complessivo (€)</span>
         <input id="budget" inputmode="decimal" placeholder="es. 1000">
       </label>
       <button class="primary-button" value="save">Salva</button>
-      <button type="button" class="settings-link" id="openCategories">??? Gestisci categorie e budget</button>
-      <button type="button" class="settings-link" id="openRecurring">? Gestisci spese ricorrenti</button>
+      <button type="button" class="settings-link" id="openCategories">🏷️ Gestisci categorie e budget</button>
+      <button type="button" class="settings-link" id="openRecurring">↻ Gestisci spese ricorrenti</button>
       <section class="settings-section">
         <p class="eyebrow">CONTI E CARTE</p>
         <div id="accountsList"></div>
@@ -137,25 +137,25 @@
 
   <dialog id="creditDialog">
     <div class="dialog-card scrollable">
-      <div class="dialog-heading"><h2>Configura carta</h2><button class="icon-button" data-close="creditDialog">?</button></div>
+      <div class="dialog-heading"><h2>Configura carta</h2><button class="icon-button" data-close="creditDialog">×</button></div>
       <input type="hidden" id="creditId">
       <label class="text-field"><span>Nome carta</span><input id="creditName" maxlength="30"></label>
-      <label class="text-field"><span>Plafond mensile (?)</span><input id="creditLimit" inputmode="decimal"></label>
+      <label class="text-field"><span>Plafond mensile (€)</span><input id="creditLimit" inputmode="decimal"></label>
       <label class="text-field"><span>Giorno di addebito (mese successivo)</span><input id="creditDebitDay" type="number" min="1" max="28" value="15"></label>
       <label class="text-field"><span>Conto di addebito</span><select id="creditLinkedAccount"></select></label>
       <button class="primary-button" id="saveCredit">Salva carta</button>
-      <p class="privacy-note">L?estratto conto chiude l?ultimo giorno del mese. L?addebito cumulativo avverr? il mese seguente.</p>
+      <p class="privacy-note">L’estratto conto chiude l’ultimo giorno del mese. L’addebito cumulativo avverrà il mese seguente.</p>
     </div>
   </dialog>
 
-  <dialog id="categoriesDialog"><div class="dialog-card scrollable"><div class="dialog-heading"><h2>Categorie e budget</h2><button class="icon-button" data-close="categoriesDialog">?</button></div><p class="privacy-note">Il budget ? mensile.</p><div id="categoriesList"></div><div class="add-row"><input id="newCategoryName" maxlength="24" placeholder="Nuova categoria"><button id="addCategory">Aggiungi</button></div></div></dialog>
-  <dialog id="recurringDialog"><div class="dialog-card scrollable"><div class="dialog-heading"><h2>Spese ricorrenti</h2><button class="icon-button" data-close="recurringDialog">?</button></div><div id="recurringList"></div></div></dialog>
+  <dialog id="categoriesDialog"><div class="dialog-card scrollable"><div class="dialog-heading"><h2>Categorie e budget</h2><button class="icon-button" data-close="categoriesDialog">×</button></div><p class="privacy-note">Il budget è mensile.</p><div id="categoriesList"></div><div class="add-row"><input id="newCategoryName" maxlength="24" placeholder="Nuova categoria"><button id="addCategory">Aggiungi</button></div></div></dialog>
+  <dialog id="recurringDialog"><div class="dialog-card scrollable"><div class="dialog-heading"><h2>Spese ricorrenti</h2><button class="icon-button" data-close="recurringDialog">×</button></div><div id="recurringList"></div></div></dialog>
 
   <dialog id="filterDialog">
     <div class="dialog-card">
       <div class="dialog-heading">
         <h2>Filtra categoria</h2>
-        <button class="icon-button" data-close="filterDialog" aria-label="Chiudi">?</button>
+        <button class="icon-button" data-close="filterDialog" aria-label="Chiudi">×</button>
       </div>
       <div class="filter-list" id="filterList"></div>
     </div>

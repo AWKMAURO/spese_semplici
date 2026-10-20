@@ -73,7 +73,7 @@ syncStatements=function(){
       if(!(total>0))continue;
       valid.add(key);
       const label=monthFmt.format(new Date(`${period}-15T12:00:00`));
-      const values={amount:total,accountId:card.linkedAccountId,date,note:`Addebito ${card.name} ? ${label}`,kind:'credit_statement',statementKey:key,cardId:card.id,transactionType:'expense'};
+      const values={amount:total,accountId:card.linkedAccountId,date,note:`Addebito ${card.name} · ${label}`,kind:'credit_statement',statementKey:key,cardId:card.id,transactionType:'expense'};
       if(existing)Object.assign(existing,values);
       else state.expenses.push({id:uid(),createdAt:Date.now(),category:null,...values});
     }
@@ -92,10 +92,10 @@ v14BalanceDialog.innerHTML=`
   <form class="dialog-card scrollable" id="balanceForm">
     <div class="dialog-heading">
       <div><p class="eyebrow" id="balanceKind">SALDO DI PARTENZA</p><h2 id="balanceDialogTitle">Saldo di oggi</h2></div>
-      <button type="button" class="icon-button" id="closeBalanceDialog" aria-label="Chiudi">?</button>
+      <button type="button" class="icon-button" id="closeBalanceDialog" aria-label="Chiudi">×</button>
     </div>
     <input type="hidden" id="balanceAccountId">
-    <label class="text-field"><span id="balanceAmountLabel">Saldo disponibile mostrato dalla banca (?)</span><input id="balanceAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" required></label>
+    <label class="text-field"><span id="balanceAmountLabel">Saldo disponibile mostrato dalla banca (€)</span><input id="balanceAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" required></label>
     <label class="text-field"><span>Data del punto di partenza</span><input id="balanceDate" type="date" readonly></label>
     <div class="balance-explanation" id="balanceHint"></div>
     <button class="primary-button" type="submit" id="saveBalance">Usa come punto di partenza</button>
@@ -110,11 +110,11 @@ function v14OpenBalance(accountId){
   $('balanceDate').value=today();
   $('balanceKind').textContent=isCard?'CARTA DI CREDITO':'CONTO O CONTANTI';
   $('balanceDialogTitle').textContent=isCard?item.name:`Saldo di ${item.name}`;
-  $('balanceAmountLabel').textContent=isCard?'Totale gi? speso nel ciclo corrente (?)':'Saldo disponibile mostrato oggi (?)';
+  $('balanceAmountLabel').textContent=isCard?'Totale già speso nel ciclo corrente (€)':'Saldo disponibile mostrato oggi (€)';
   const current=isCard?v14CardVisibleActual(item.id,period):v14BankBalance(item.id);
   $('balanceAmount').value=current===null?'':Number(current).toFixed(2).replace('.',',');
   $('balanceHint').innerHTML=isCard
-    ?`<strong>Chiusura il 31 del mese</strong><span>Inserisci il totale che vedi oggi sulla carta. Non diventa una spesa di categoria: consumer? il plafond e sar? incluso nell?unico addebito del mese prossimo sul conto collegato.</span>`
+    ?`<strong>Chiusura il 31 del mese</strong><span>Inserisci il totale che vedi oggi sulla carta. Non diventa una spesa di categoria: consumerà il plafond e sarà incluso nell’unico addebito del mese prossimo sul conto collegato.</span>`
     :`<strong>Nessun movimento fittizio</strong><span>Questo valore diventa la base di oggi. Da qui in avanti entrate, uscite e addebiti della carta aggiorneranno automaticamente il saldo stimato.</span>`;
   if($('settingsDialog').open)$('settingsDialog').close();
   v14BalanceDialog.showModal();
@@ -126,7 +126,7 @@ $('balanceForm').onsubmit=event=>{
   event.preventDefault();
   const item=account($('balanceAccountId').value),value=parseAmount($('balanceAmount').value);
   if(!item||!Number.isFinite(value))return alert('Inserisci un importo valido.');
-  if(item.type==='credit'&&value<0)return alert('Lo speso della carta non pu? essere negativo.');
+  if(item.type==='credit'&&value<0)return alert('Lo speso della carta non può essere negativo.');
   syncStatements();
   const snapshot={amount:v14Money(value),asOfDate:today(),recordedAt:Date.now()};
   if(item.type==='credit'){
@@ -160,10 +160,10 @@ renderSettings=function(){
     const type=row.querySelector('.account-type');
     if(item.type==='credit'){
       const used=v14CardVisibleActual(item.id,v14CurrentPeriod()),remaining=Number(item.limit)?Number(item.limit)-used:null;
-      type.textContent=`Carta ? speso ${eur.format(used)}${remaining===null?'':` ? disponibile ${eur.format(Math.max(remaining,0))}`}`;
+      type.textContent=`Carta · speso ${eur.format(used)}${remaining===null?'':` · disponibile ${eur.format(Math.max(remaining,0))}`}`;
     }else{
       const current=v14BankBalance(item.id),snapshot=state.balanceSnapshots[item.id];
-      type.textContent=snapshot?`Saldo stimato ${eur.format(current)} ? base ${v14HumanDate(snapshot.asOfDate)}`:'Conto / contanti ? saldo da impostare';
+      type.textContent=snapshot?`Saldo stimato ${eur.format(current)} · base ${v14HumanDate(snapshot.asOfDate)}`:'Conto / contanti · saldo da impostare';
     }
   }
   v14BindBalanceButtons();
@@ -173,11 +173,11 @@ renderCreditCards=function(){
   const cards=state.accounts.filter(a=>a.type==='credit'),period=v14ViewPeriod(),current=v14CurrentPeriod();
   $('creditCardsSection').classList.toggle('hidden',!cards.length);
   const title=$('creditCardsSection').querySelector('h2');
-  if(title)title.textContent='Speso nel ciclo e disponibilit?';
+  if(title)title.textContent='Speso nel ciclo e disponibilità';
   $('creditCardsChart').innerHTML=cards.map(card=>{
     const used=Math.max(v14CardVisibleActual(card.id,period),0),planned=v14CardPlannedForView(card.id),limit=Number(card.limit)||0,remaining=limit-used,p=limit?Math.round(used/limit*100):0,status=p>100?'over':p>=80?'warning':'',debitDate=chargeDate(period,card.debitDay),baseline=v14CardBaseline(card.id,period);
     const debitLabel=debitDate<=today()?'Addebitato':'Prossimo addebito';
-    return`<div class="card-status"><div class="card-status-head"><strong>?? ${esc(card.name)}</strong><span>${eur.format(used)} di ${limit?eur.format(limit):'plafond non impostato'}</span></div><div class="budget-track"><div class="budget-fill ${status}" style="width:${limit?Math.min(p,100):0}%"></div></div><div class="card-balance-meta"><strong>${limit?`${eur.format(Math.max(remaining,0))} disponibili`:'Imposta il plafond'}</strong><span>${debitLabel} ${v14HumanDate(debitDate)} ? ${eur.format(used)} su ${esc(account(card.linkedAccountId)?.name||'conto da configurare')}</span>${planned?`<span>${eur.format(planned)} di spese previste, non ancora conteggiate</span>`:''}${baseline?`<span>Base iniziale rilevata ${v14HumanDate(baseline.asOfDate)}</span>`:''}</div>${period===current?`<button type="button" class="balance-card-button" data-balance-account="${esc(card.id)}">Aggiorna situazione carta</button>`:''}</div>`;
+    return`<div class="card-status"><div class="card-status-head"><strong>💳 ${esc(card.name)}</strong><span>${eur.format(used)} di ${limit?eur.format(limit):'plafond non impostato'}</span></div><div class="budget-track"><div class="budget-fill ${status}" style="width:${limit?Math.min(p,100):0}%"></div></div><div class="card-balance-meta"><strong>${limit?`${eur.format(Math.max(remaining,0))} disponibili`:'Imposta il plafond'}</strong><span>${debitLabel} ${v14HumanDate(debitDate)} · ${eur.format(used)} su ${esc(account(card.linkedAccountId)?.name||'conto da configurare')}</span>${planned?`<span>${eur.format(planned)} di spese previste, non ancora conteggiate</span>`:''}${baseline?`<span>Base iniziale rilevata ${v14HumanDate(baseline.asOfDate)}</span>`:''}</div>${period===current?`<button type="button" class="balance-card-button" data-balance-account="${esc(card.id)}">Aggiorna situazione carta</button>`:''}</div>`;
   }).join('');
   v14BindBalanceButtons();
 };
@@ -187,15 +187,15 @@ accountOverview=function(){
   $('stateAccounts').innerHTML=state.accounts.map(item=>{
     if(item.type==='credit'){
       const used=Math.max(v14CardVisibleActual(item.id,period),0),planned=v14CardPlannedForView(item.id),limit=Number(item.limit)||0,remaining=limit-used,p=limit?Math.round(used/limit*100):0;
-      return`<article class="state-account-card live-account-card"><span>?? ${esc(item.name)} ? speso nel ciclo</span><strong>${eur.format(used)}</strong><div class="mini-progress"><i style="width:${limit?Math.min(p,100):0}%;background:${p>100?'#d95b4f':p>=80?'#e9a13b':''}"></i></div><span class="account-detail">${limit?`${eur.format(Math.max(remaining,0))} disponibili sul plafond`:'Plafond da impostare'}</span>${planned?`<span class="account-detail">${eur.format(planned)} previsti</span>`:''}${period===current?`<button type="button" class="balance-inline-button" data-balance-account="${esc(item.id)}">Aggiorna</button>`:''}</article>`;
+      return`<article class="state-account-card live-account-card"><span>💳 ${esc(item.name)} · speso nel ciclo</span><strong>${eur.format(used)}</strong><div class="mini-progress"><i style="width:${limit?Math.min(p,100):0}%;background:${p>100?'#d95b4f':p>=80?'#e9a13b':''}"></i></div><span class="account-detail">${limit?`${eur.format(Math.max(remaining,0))} disponibili sul plafond`:'Plafond da impostare'}</span>${planned?`<span class="account-detail">${eur.format(planned)} previsti</span>`:''}${period===current?`<button type="button" class="balance-inline-button" data-balance-account="${esc(item.id)}">Aggiorna</button>`:''}</article>`;
     }
     const snapshot=state.balanceSnapshots[item.id];
     if(period===current&&snapshot){
       const balance=v14BankBalance(item.id),change=v14Money(balance-Number(snapshot.amount));
-      return`<article class="state-account-card live-account-card"><span>? ${esc(item.name)} ? saldo stimato oggi</span><strong>${balance>=0?'':'? '}${eur.format(Math.abs(balance))}</strong><span class="account-detail">Base ${v14HumanDate(snapshot.asOfDate)} ? ${change===0?'nessun nuovo movimento':`${change>0?'+ ':'? '}${eur.format(Math.abs(change))}`}</span><button type="button" class="balance-inline-button" data-balance-account="${esc(item.id)}">Aggiorna saldo</button></article>`;
+      return`<article class="state-account-card live-account-card"><span>● ${esc(item.name)} · saldo stimato oggi</span><strong>${balance>=0?'':'− '}${eur.format(Math.abs(balance))}</strong><span class="account-detail">Base ${v14HumanDate(snapshot.asOfDate)} · ${change===0?'nessun nuovo movimento':`${change>0?'+ ':'− '}${eur.format(Math.abs(change))}`}</span><button type="button" class="balance-inline-button" data-balance-account="${esc(item.id)}">Aggiorna saldo</button></article>`;
     }
     const actualAccount=actual.filter(x=>x.accountId===item.id),forecastAccount=forecast.filter(x=>x.accountId===item.id),outgoingActual=actualAccount.filter(x=>x.transactionType!=='income').reduce((sum,x)=>sum+Number(x.amount),0),outgoingForecast=forecastAccount.filter(x=>x.transactionType!=='income').reduce((sum,x)=>sum+Number(x.amount),0),incomingActual=actualAccount.filter(x=>x.transactionType==='income').reduce((sum,x)=>sum+Number(x.amount),0),incomingForecast=forecastAccount.filter(x=>x.transactionType==='income').reduce((sum,x)=>sum+Number(x.amount),0),balance=incomingActual+incomingForecast-outgoingActual-outgoingForecast;
-    return`<article class="state-account-card live-account-card"><span>? ${esc(item.name)} ? bilancio mese</span><strong>${balance>=0?'+ ':''}${eur.format(balance)}</strong><div class="mini-progress"><i style="width:${Math.min((outgoingActual+outgoingForecast)/Math.max(state.budget||outgoingActual+outgoingForecast,1)*100,100)}%"></i></div>${period===current?`<button type="button" class="balance-inline-button" data-balance-account="${esc(item.id)}">Inserisci saldo di oggi</button>`:''}</article>`;
+    return`<article class="state-account-card live-account-card"><span>● ${esc(item.name)} · bilancio mese</span><strong>${balance>=0?'+ ':''}${eur.format(balance)}</strong><div class="mini-progress"><i style="width:${Math.min((outgoingActual+outgoingForecast)/Math.max(state.budget||outgoingActual+outgoingForecast,1)*100,100)}%"></i></div>${period===current?`<button type="button" class="balance-inline-button" data-balance-account="${esc(item.id)}">Inserisci saldo di oggi</button>`:''}</article>`;
   }).join('');
   v14BindBalanceButtons();
 };
@@ -206,10 +206,10 @@ function v14RenderBalanceHero(){
   if(!current)return;
   const known=banks.filter(a=>state.balanceSnapshots[a.id]&&v14BankBalance(a.id)!==null);
   if(!known.length){
-    v14BalanceHero.innerHTML='<div><span>DISPONIBILIT? DI OGGI</span><strong>Inserisci i saldi di partenza</strong><p>Da questo momento l?app aggiorner? automaticamente ogni conto.</p></div><button type="button" id="openBalanceSettings">Imposta saldi</button>';
+    v14BalanceHero.innerHTML='<div><span>DISPONIBILITÀ DI OGGI</span><strong>Inserisci i saldi di partenza</strong><p>Da questo momento l’app aggiornerà automaticamente ogni conto.</p></div><button type="button" id="openBalanceSettings">Imposta saldi</button>';
   }else{
     const total=v14Money(known.reduce((sum,a)=>sum+v14BankBalance(a.id),0)),missing=banks.length-known.length;
-    v14BalanceHero.innerHTML=`<div><span>${missing?'SALDI INSERITI':'DISPONIBILIT? TOTALE OGGI'}</span><strong>${total>=0?'':'? '}${eur.format(Math.abs(total))}</strong><p>${missing?`Manca il saldo di ${missing} ${missing===1?'conto':'conti'}.`:`Somma di ${known.length} ${known.length===1?'conto':'conti'}; le carte incidono solo nel giorno dell?addebito.`}</p></div><button type="button" id="openBalanceSettings">Gestisci</button>`;
+    v14BalanceHero.innerHTML=`<div><span>${missing?'SALDI INSERITI':'DISPONIBILITÀ TOTALE OGGI'}</span><strong>${total>=0?'':'− '}${eur.format(Math.abs(total))}</strong><p>${missing?`Manca il saldo di ${missing} ${missing===1?'conto':'conti'}.`:`Somma di ${known.length} ${known.length===1?'conto':'conti'}; le carte incidono solo nel giorno dell’addebito.`}</p></div><button type="button" id="openBalanceSettings">Gestisci</button>`;
   }
   v14BindBalanceButtons();
 }
@@ -234,7 +234,7 @@ render=function(){
     const actual=v14CardVisibleActual(selected.id,period),planned=v14CardPlannedForView(selected.id);
     $('totalLabel').textContent=`Speso con ${selected.name}`;
     $('monthlyTotal').textContent=eur.format(actual);
-    $('cashflowNote').textContent=planned?`${eur.format(planned)} previsti nel resto del ciclo. Sar? addebitato il totale il mese successivo.`:'Sar? addebitato in un?unica soluzione il mese successivo.';
+    $('cashflowNote').textContent=planned?`${eur.format(planned)} previsti nel resto del ciclo. Sarà addebitato il totale il mese successivo.`:'Sarà addebitato in un’unica soluzione il mese successivo.';
   }else $('totalLabel').textContent='Bilancio del mese';
 };
 
