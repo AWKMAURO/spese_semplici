@@ -1,0 +1,24 @@
+.live-balance-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px;padding:17px 18px;border:1px solid #cfe0d8;border-radius:20px;background:#eaf3ee}
+.live-balance-summary>div{min-width:0}
+.live-balance-summary span,.live-balance-summary strong,.live-balance-summary p{display:block}
+.live-balance-summary span{color:var(--green);font-size:.66rem;font-weight:900;letter-spacing:.09em}
+.live-balance-summary strong{margin-top:5px;font-size:1.35rem;line-height:1.15;letter-spacing:-.03em}
+.live-balance-summary p{margin-top:5px;color:var(--muted);font-size:.72rem;line-height:1.4}
+.live-balance-summary button,.balance-inline-button,.balance-card-button{border:0;border-radius:12px;background:var(--green);color:#fff;font-size:.72rem;font-weight:850;cursor:pointer}
+.live-balance-summary button{flex:0 0 auto;padding:10px 12px}
+.state-accounts{grid-template-columns:1fr}
+.live-account-card{position:relative;padding-bottom:14px}
+.state-account-card .account-detail{margin-top:6px;overflow:visible;line-height:1.35;text-overflow:clip;white-space:normal}
+.balance-inline-button{width:100%;min-height:38px;margin-top:11px;padding:8px 10px;background:#edf2ef;color:var(--green)}
+.balance-explanation{margin-top:16px;padding:14px;border-radius:15px;background:#f0ede5}
+.balance-explanation strong,.balance-explanation span{display:block}
+.balance-explanation strong{font-size:.82rem}
+.balance-explanation span{margin-top:5px;color:var(--muted);font-size:.76rem;line-height:1.45}
+#balanceDialog .dialog-card{max-height:min(86vh,640px)}
+#balanceDialog .text-field input[readonly]{background:#f3f0e9;color:var(--muted)}
+.card-balance-meta{display:grid;gap:4px;margin-top:10px}
+.card-balance-meta strong{font-size:.82rem}
+.card-balance-meta span{color:var(--muted);font-size:.72rem;line-height:1.35}
+.balance-card-button{width:100%;min-height:42px;margin-top:12px;padding:10px 12px;background:#edf2ef;color:var(--green)}
+@media(min-width:520px){.state-accounts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:360px){.live-balance-summary{align-items:flex-start;flex-direction:column}.live-balance-summary button{width:100%}}
