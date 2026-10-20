@@ -96,11 +96,26 @@ v14BalanceDialog.innerHTML=`
     </div>
     <input type="hidden" id="balanceAccountId">
     <label class="text-field"><span id="balanceAmountLabel">Saldo disponibile mostrato dalla banca (€)</span><input id="balanceAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" required></label>
+    <div class="balance-sign-choice" id="balanceSignChoice" role="group" aria-label="Segno del saldo">
+      <button type="button" data-balance-sign="positive" aria-pressed="true">+ Positivo</button>
+      <button type="button" data-balance-sign="negative" aria-pressed="false">− Negativo</button>
+    </div>
     <label class="text-field"><span>Data del punto di partenza</span><input id="balanceDate" type="date" readonly></label>
     <div class="balance-explanation" id="balanceHint"></div>
     <button class="primary-button" type="submit" id="saveBalance">Usa come punto di partenza</button>
   </form>`;
 document.body.appendChild(v14BalanceDialog);
+
+let v14BalanceSign=1;
+function v14SetBalanceSign(sign){
+  v14BalanceSign=sign<0?-1:1;
+  document.querySelectorAll('[data-balance-sign]').forEach(button=>{
+    const active=(button.dataset.balanceSign==='negative'?-1:1)===v14BalanceSign;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+}
+document.querySelectorAll('[data-balance-sign]').forEach(button=>button.onclick=()=>v14SetBalanceSign(button.dataset.balanceSign==='negative'?-1:1));
 
 function v14OpenBalance(accountId){
   const item=account(accountId);
@@ -112,7 +127,9 @@ function v14OpenBalance(accountId){
   $('balanceDialogTitle').textContent=isCard?item.name:`Saldo di ${item.name}`;
   $('balanceAmountLabel').textContent=isCard?'Totale già speso nel ciclo corrente (€)':'Saldo disponibile mostrato oggi (€)';
   const current=isCard?v14CardVisibleActual(item.id,period):v14BankBalance(item.id);
-  $('balanceAmount').value=current===null?'':Number(current).toFixed(2).replace('.',',');
+  $('balanceSignChoice').classList.toggle('hidden',isCard);
+  v14SetBalanceSign(!isCard&&current!==null&&Number(current)<0?-1:1);
+  $('balanceAmount').value=current===null?'':Math.abs(Number(current)).toFixed(2).replace('.',',');
   $('balanceHint').innerHTML=isCard
     ?`<strong>Chiusura il 31 del mese</strong><span>Inserisci il totale che vedi oggi sulla carta. Non diventa una spesa di categoria: consumerà il plafond e sarà incluso nell’unico addebito del mese prossimo sul conto collegato.</span>`
     :`<strong>Nessun movimento fittizio</strong><span>Questo valore diventa la base di oggi. Da qui in avanti entrate, uscite e addebiti della carta aggiorneranno automaticamente il saldo stimato.</span>`;
@@ -124,9 +141,10 @@ function v14OpenBalance(accountId){
 $('closeBalanceDialog').onclick=()=>v14BalanceDialog.close();
 $('balanceForm').onsubmit=event=>{
   event.preventDefault();
-  const item=account($('balanceAccountId').value),value=parseAmount($('balanceAmount').value);
-  if(!item||!Number.isFinite(value))return alert('Inserisci un importo valido.');
-  if(item.type==='credit'&&value<0)return alert('Lo speso della carta non può essere negativo.');
+  const item=account($('balanceAccountId').value),entered=parseAmount($('balanceAmount').value);
+  if(!item||!Number.isFinite(entered))return alert('Inserisci un importo valido.');
+  if(item.type==='credit'&&entered<0)return alert('Lo speso della carta non può essere negativo.');
+  const value=item.type==='credit'?entered:v14Money(Math.abs(entered)*(entered<0?-1:v14BalanceSign));
   syncStatements();
   const snapshot={amount:v14Money(value),asOfDate:today(),recordedAt:Date.now()};
   if(item.type==='credit'){

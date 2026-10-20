@@ -4,6 +4,8 @@
 
 Da **Impostazioni → Conti e carte** è possibile inserire il saldo disponibile mostrato oggi per ogni conto. Il valore resta separato dai movimenti e diventa la base da cui l'app calcola il saldo stimato con le nuove entrate e uscite.
 
+Per i conti e i contanti il saldo di partenza può essere positivo o negativo; il selettore dedicato evita di dover digitare il segno meno dalla tastiera dell'iPhone.
+
 Per le carte di credito si inserisce invece il totale già speso nel ciclo corrente. Questo valore consuma il plafond e confluisce nell'addebito cumulativo del mese successivo, senza entrare nei budget delle categorie e senza ridurre subito il saldo del conto.
 
 PWA locale per gestire le spese personali. Non usa server e conserva i dati nel `localStorage` del browser.

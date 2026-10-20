@@ -14,6 +14,11 @@
 .balance-explanation strong,.balance-explanation span{display:block}
 .balance-explanation strong{font-size:.82rem}
 .balance-explanation span{margin-top:5px;color:var(--muted);font-size:.76rem;line-height:1.45}
+.balance-sign-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.balance-sign-choice button{min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);font-size:.75rem;font-weight:850;cursor:pointer}
+.balance-sign-choice button.active{border-color:var(--green);background:#e8f0ec;color:var(--green)}
+.balance-sign-choice button[data-balance-sign="negative"].active{border-color:var(--accent);background:#fff0ea;color:var(--accent-dark)}
+.balance-sign-choice.hidden{display:none}
 #balanceDialog .dialog-card{max-height:min(86vh,640px)}
 #balanceDialog .text-field input[readonly]{background:#f3f0e9;color:var(--muted)}
 .card-balance-meta{display:grid;gap:4px;margin-top:10px}
